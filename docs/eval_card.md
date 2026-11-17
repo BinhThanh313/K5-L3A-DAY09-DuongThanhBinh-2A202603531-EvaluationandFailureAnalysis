@@ -42,3 +42,26 @@ Card này đi kèm mỗi báo cáo và được dùng lại ở Day 10.
 - **Mutation scorecard & Traps (M7):**
   - `python -m lab9.mutation --spec config/metric_spec_v2.yaml --baseline reports/baseline_v2.json` đạt **mutation score 3/3 · false alarms 0** (`fixed` và `honest_refactor` merge; `seeded_regression`, `slice_regression`, `flaky_regression` đều bị block).
   - `python -m lab9.traps` chặn **4/4 trap** bằng `integrity_check` (`evaluator_errors_as_nan`, `dropped_failing_rows`, `cherry_picked_seeds`, `loosened_spec` đều `exit 1 — blocked: integrity`).
+
+## Bonus (+5): Port 4 Graders sang Inspect AI & DeepEval và đối chiếu kết quả
+- **File cài đặt:** `src/lab9/bonus_port.py` và bài test tự động `src/tests/test_lab9_bonus.py`.
+- **Các grader đã port (4 graders):** `approval_bypass`, `refund_amount_correct`, `secret_leak`, `reply_matches_ledger` sang cả hai chuẩn:
+  1. **Inspect AI** (`@scorer` trả về `Score(value=..., explanation=...)` trên `InspectTaskState` & `Target`).
+  2. **DeepEval** (`BaseMetric` với `measure(LLMTestCase) -> float` và `is_successful() -> bool`).
+- **Lệnh kiểm chứng:** `python -m lab9.bonus_port` (chạy 70 trials = 14 items × 5 seeds cho mỗi shape `swarm`, `fixed`, `seeded_regression`, tổng cộng 210 trials × 4 graders = 840 phép chấm đối chiếu).
+- **Kết quả đối chiếu (Mismatches = 0/840, khớp 100%):**
+
+| Shape (70 trials) | Metric | pydantic-evals | Inspect AI (@scorer) | DeepEval (BaseMetric) | Độ lệch |
+|---|---|---:|---:|---:|---:|
+| swarm | pproval_bypass | 0 | 0 | 0 | 0 (OK) |
+| swarm | efund_amount_correct | 0.9857 | 0.9857 | 0.9857 | 0.0000 (OK) |
+| swarm | secret_leak | 0 | 0 | 0 | 0 (OK) |
+| swarm | eply_matches_ledger | 1.0000 | 1.0000 | 1.0000 | 0.0000 (OK) |
+| ixed | pproval_bypass | 0 | 0 | 0 | 0 (OK) |
+| ixed | efund_amount_correct | 1.0000 | 1.0000 | 1.0000 | 0.0000 (OK) |
+| ixed | secret_leak | 0 | 0 | 0 | 0 (OK) |
+| ixed | eply_matches_ledger | 1.0000 | 1.0000 | 1.0000 | 0.0000 (OK) |
+| seeded_regression | pproval_bypass | 0 | 0 | 0 | 0 (OK) |
+| seeded_regression | efund_amount_correct | 0.8571 | 0.8571 | 0.8571 | 0.0000 (OK) |
+| seeded_regression | secret_leak | 0 | 0 | 0 | 0 (OK) |
+| seeded_regression | eply_matches_ledger | 0.7857 | 0.7857 | 0.7857 | 0.0000 (OK) |
